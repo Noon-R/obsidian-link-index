@@ -1,0 +1,10 @@
+{
+  "id": "link-index",
+  "name": "Link Index",
+  "version": "0.1.0",
+  "minAppVersion": "1.4.0",
+  "description": "PureRef-style infinite canvas for managing web links and local files.",
+  "author": "noon",
+  "authorUrl": "https://github.com/noon-r",
+  "isDesktopOnly": true
+}

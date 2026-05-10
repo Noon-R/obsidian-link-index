@@ -1,0 +1,16 @@
+# Node
+node_modules/
+*.js.map
+
+# Obsidian build output (build from source with: npm run build)
+main.js
+
+# Rust build artifacts
+link-index-mcp/target/
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
