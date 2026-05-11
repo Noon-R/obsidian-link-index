@@ -1,4 +1,7 @@
 import { ItemView, Menu, Notice, WorkspaceLeaf, debounce } from "obsidian";
+const { shell } = require("electron") as {
+	shell: { openPath(p: string): Promise<string>; showItemInFolder(p: string): void };
+};
 import type LinkIndexPlugin from "../../main";
 import type { Board, CardNode, CardStatus, FrameNode } from "../types";
 import { CARD_W, CARD_H } from "../types";
@@ -379,6 +382,17 @@ export class CanvasView extends ItemView {
 						.onClick(() => this.app.workspace.openLinkText(card.path!, "", false))
 				);
 			}
+			if (card?.type === "local-file" && card.path) {
+				const nativePath = card.path.replace(/\//g, "\\");
+				menu.addItem((i) =>
+					i.setTitle("開く").setIcon("arrow-up-right")
+						.onClick(() => void shell.openPath(nativePath))
+				);
+				menu.addItem((i) =>
+					i.setTitle("フォルダで表示").setIcon("folder-open")
+						.onClick(() => shell.showItemInFolder(nativePath))
+				);
+			}
 
 			// ステータス変更（フラット項目）
 			if (card) {
@@ -509,6 +523,8 @@ export class CanvasView extends ItemView {
 		if (card.url) window.open(card.url, "_blank");
 		else if (card.type === "vault-note" && card.path)
 			this.app.workspace.openLinkText(card.path, "", false);
+		else if (card.type === "local-file" && card.path)
+			void shell.openPath(card.path.replace(/\//g, "\\"));
 	}
 
 	// ────────────────────────────── Keyboard ──────────────────────────────
