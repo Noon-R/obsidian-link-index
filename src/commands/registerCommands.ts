@@ -26,7 +26,6 @@ export function registerCommands(plugin: LinkIndexPlugin): void {
 	plugin.addCommand({
 		id: "open-selected-card",
 		name: "選択したカードを開く",
-		hotkeys: [{ modifiers: [], key: "Enter" }],
 		checkCallback: (checking) => {
 			const view = getCanvasView(plugin);
 			if (!view) return false;

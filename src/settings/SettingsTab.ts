@@ -4,7 +4,7 @@ import type LinkIndexPlugin from "../../main";
 const COMMANDS = [
 	{ name: "Link Index を開く",               default: "—" },
 	{ name: "リンクを追加...",                   default: "Ctrl + N" },
-	{ name: "選択したカードを開く",               default: "Enter" },
+	{ name: "選択したカードを開く",               default: "（未設定）" },
 	{ name: "検索バーを表示/非表示",              default: "Ctrl + F" },
 	{ name: "自動レイアウト（タグでグルーピング）", default: "Ctrl + Shift + L" },
 	{ name: "全体を表示",                        default: "F" },
