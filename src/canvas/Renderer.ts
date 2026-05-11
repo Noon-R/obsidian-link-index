@@ -79,8 +79,15 @@ export class Renderer {
 		selBox?: SelectionBox | null,
 		matchedCardIds?: Set<string> | null
 	): void {
-		const { width: cw, height: ch } = this.canvas;
-		this.ctx.clearRect(0, 0, cw, ch);
+		const dpr = window.devicePixelRatio || 1;
+		const cw = this.canvas.width  / dpr;
+		const ch = this.canvas.height / dpr;
+
+		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+		this.ctx.save();
+		this.ctx.scale(dpr, dpr);
+
 		this.drawBackground(cw, ch, viewport);
 
 		const { x: vx, y: vy, zoom } = viewport;
@@ -122,7 +129,8 @@ export class Renderer {
 		for (const n of cards)  { if (selectedIds.has(n.id)) this.drawResizeHandles(n); }
 
 		if (selBox) this.drawSelectionBox(selBox);
-		this.ctx.restore();
+		this.ctx.restore(); // viewport zoom/translate
+		this.ctx.restore(); // dpr scale
 	}
 
 	// ─────────────── Background & Grid ───────────────

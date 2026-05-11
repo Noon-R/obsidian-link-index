@@ -171,8 +171,9 @@ export class CanvasView extends ItemView {
 	onResize(): void {
 		const rect = this.canvas.getBoundingClientRect();
 		if (rect.width === 0 || rect.height === 0) return;
-		this.canvas.width = rect.width;
-		this.canvas.height = rect.height;
+		const dpr = window.devicePixelRatio || 1;
+		this.canvas.width  = Math.round(rect.width  * dpr);
+		this.canvas.height = Math.round(rect.height * dpr);
 		this.scheduleRender();
 	}
 
