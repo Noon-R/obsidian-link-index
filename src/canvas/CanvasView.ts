@@ -18,6 +18,7 @@ import { DragMove } from "./interactions/DragMove";
 import { Resize } from "./interactions/Resize";
 import { PasteDrop } from "./interactions/PasteDrop";
 import { QuickAddModal } from "./QuickAddModal";
+import { CardEditModal } from "./CardEditModal";
 import { BoardRepository } from "../domain/BoardRepository";
 import { CardRepository } from "../domain/CardRepository";
 import { LinkIndex } from "../domain/Index";
@@ -387,8 +388,21 @@ export class CanvasView extends ItemView {
 				);
 			}
 
-			// ステータス変更（フラット項目）
+			// 編集・ステータス変更
 			if (card) {
+				menu.addSeparator();
+				menu.addItem((i) =>
+					i.setTitle("カードを編集").setIcon("pencil")
+						.onClick(() => {
+							new CardEditModal(this.app, card, async (patch) => {
+								await this.cardRepo.update(cardNode.card_id, patch);
+								const up = await this.cardRepo.read(cardNode.card_id);
+								if (up) { this.index.set(up); this.scheduleRender(); }
+							}).open();
+						})
+				);
+
+				menu.addSeparator();
 				const statuses: CardStatus[] = ["unread", "reading", "done", "archive"];
 				for (const st of statuses) {
 					menu.addItem((si) =>
