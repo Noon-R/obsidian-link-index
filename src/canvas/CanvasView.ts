@@ -570,22 +570,14 @@ export class CanvasView extends ItemView {
 
 	private async recoverOrphanedNodes(): Promise<void> {
 		if (!this.board) return;
-		const orphanIds = new Set<string>();
 		for (const node of this.board.nodes) {
 			if (node.type !== "card") continue;
 			const cn = node as CardNode;
 			if (!this.index.get(cn.card_id)) {
 				const card = await this.cardRepo.read(cn.card_id);
-				if (card) {
-					this.index.set(card);
-				} else {
-					orphanIds.add(cn.id);
-				}
+				if (card) this.index.set(card);
+				// 読み取り失敗でもノードは削除しない（誤削除防止）
 			}
-		}
-		if (orphanIds.size > 0) {
-			this.board.nodes = this.board.nodes.filter((n) => !orphanIds.has(n.id));
-			await this.boardRepo.save(this.board);
 		}
 	}
 
