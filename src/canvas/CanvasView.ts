@@ -560,6 +560,32 @@ export class CanvasView extends ItemView {
 
 	// ────────────────────────────── Public API ──────────────────────────────
 
+	openSelectedCard(): void {
+		if (!this.board) return;
+		const ids = this.selection.getIds();
+		if (ids.size !== 1) return;
+		const nodeId = [...ids][0];
+		const node = this.board.nodes.find((n) => n.id === nodeId);
+		if (!node || node.type !== "card") return;
+		const card = this.index.get((node as CardNode).card_id);
+		if (!card) return;
+		if (card.url) window.open(card.url, "_blank");
+		else if (card.type === "vault-note" && card.path)
+			this.app.workspace.openLinkText(card.path, "", false);
+		else if (card.type === "local-file" && card.path)
+			void shell.openPath(card.path.replace(/\//g, "\\"));
+	}
+
+	toggleSearch(): void {
+		if (this.searchOverlay.isVisible) {
+			this.searchOverlay.hide();
+			this.filterQuery = "";
+			this.scheduleRender();
+		} else {
+			this.searchOverlay.show();
+		}
+	}
+
 	private async recoverOrphanedNodes(): Promise<void> {
 		if (!this.board) return;
 		for (const node of this.board.nodes) {

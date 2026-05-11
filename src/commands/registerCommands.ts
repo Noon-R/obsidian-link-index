@@ -24,6 +24,30 @@ export function registerCommands(plugin: LinkIndexPlugin): void {
 	});
 
 	plugin.addCommand({
+		id: "open-selected-card",
+		name: "選択したカードを開く",
+		hotkeys: [{ modifiers: [], key: "Enter" }],
+		checkCallback: (checking) => {
+			const view = getCanvasView(plugin);
+			if (!view) return false;
+			if (!checking) view.openSelectedCard();
+			return true;
+		},
+	});
+
+	plugin.addCommand({
+		id: "toggle-search",
+		name: "検索バーを表示/非表示",
+		hotkeys: [{ modifiers: ["Mod"], key: "f" }],
+		checkCallback: (checking) => {
+			const view = getCanvasView(plugin);
+			if (!view) return false;
+			if (!checking) view.toggleSearch();
+			return true;
+		},
+	});
+
+	plugin.addCommand({
 		id: "auto-layout",
 		name: "自動レイアウト（タグでグルーピング）",
 		hotkeys: [{ modifiers: ["Mod", "Shift"], key: "l" }],
