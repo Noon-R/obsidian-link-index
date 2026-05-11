@@ -407,18 +407,39 @@ export class Renderer {
 		const words = text.split(" ");
 		let line = "";
 		let count = 0;
+
+		const flushLine = (truncate: boolean): void => {
+			this.ctx.fillText(truncate ? line + "…" : line, x, y + count * lineH);
+			count++;
+			line = "";
+		};
+
 		for (const word of words) {
-			const test = line ? `${line} ${word}` : word;
-			if (this.ctx.measureText(test).width > maxW && line) {
-				if (count >= maxLines - 1) {
-					this.ctx.fillText(line + "…", x, y + count * lineH);
-					return;
+			if (this.ctx.measureText(word).width > maxW) {
+				// 単語自体が1行に収まらない場合は文字単位で折り返す
+				if (line) {
+					if (count >= maxLines - 1) { flushLine(true); return; }
+					flushLine(false);
 				}
-				this.ctx.fillText(line, x, y + count * lineH);
-				line = word;
-				count++;
+				for (const ch of word) {
+					const test = line + ch;
+					if (this.ctx.measureText(test).width > maxW && line) {
+						if (count >= maxLines - 1) { flushLine(true); return; }
+						flushLine(false);
+						line = ch;
+					} else {
+						line = test;
+					}
+				}
 			} else {
-				line = test;
+				const test = line ? `${line} ${word}` : word;
+				if (this.ctx.measureText(test).width > maxW && line) {
+					if (count >= maxLines - 1) { flushLine(true); return; }
+					flushLine(false);
+					line = word;
+				} else {
+					line = test;
+				}
 			}
 		}
 		if (line && count < maxLines) this.ctx.fillText(line, x, y + count * lineH);
