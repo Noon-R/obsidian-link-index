@@ -20,6 +20,8 @@ function createEmptyBoard(): Board {
 }
 
 export class BoardRepository {
+	private saveInProgress = false;
+
 	constructor(private app: App) {}
 
 	async load(): Promise<Board> {
@@ -44,15 +46,18 @@ export class BoardRepository {
 	}
 
 	async save(board: Board): Promise<void> {
-		const dir = "LinkIndex";
-		if (!(await this.app.vault.adapter.exists(dir))) {
-			await this.app.vault.adapter.mkdir(dir);
+		if (this.saveInProgress) return;
+		this.saveInProgress = true;
+		try {
+			const dir = "LinkIndex";
+			if (!(await this.app.vault.adapter.exists(dir))) {
+				await this.app.vault.adapter.mkdir(dir);
+			}
+			const json = JSON.stringify(board, null, 2);
+			await this.app.vault.adapter.write(BOARD_PATH, json);
+		} finally {
+			this.saveInProgress = false;
 		}
-
-		const tmpPath = `${BOARD_PATH}.tmp`;
-		const json = JSON.stringify(board, null, 2);
-		await this.app.vault.adapter.write(tmpPath, json);
-		await this.app.vault.adapter.rename(tmpPath, BOARD_PATH);
 	}
 
 	static isValidBoard = isValidBoard;
