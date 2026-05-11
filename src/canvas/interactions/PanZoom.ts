@@ -39,7 +39,7 @@ export class PanZoom {
 			const rect = this.el.getBoundingClientRect();
 			this.viewport.zoomAt(factor, e.clientX - rect.left, e.clientY - rect.top);
 		} else {
-			this.viewport.pan(-e.deltaX, -e.deltaY);
+			this.viewport.pan(e.deltaX, e.deltaY);
 		}
 		this.onUpdate();
 	}

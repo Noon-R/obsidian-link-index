@@ -64,9 +64,13 @@ export class CardRepository {
 		const cards: CardFrontmatter[] = [];
 		for (const filePath of listed.files) {
 			if (!filePath.endsWith(".md")) continue;
-			const raw = await this.app.vault.adapter.read(filePath);
-			const card = this.parse(raw);
-			if (card) cards.push(card);
+			try {
+				const raw = await this.app.vault.adapter.read(filePath);
+				const card = this.parse(raw);
+				if (card) cards.push(card);
+			} catch {
+				// 読み取り失敗のファイルはスキップ
+			}
 		}
 		return cards;
 	}
@@ -86,7 +90,8 @@ export class CardRepository {
 	}
 
 	private parse(raw: string): CardFrontmatter | null {
-		const match = raw.match(/^---\n([\s\S]*?)\n---/);
+		const normalized = raw.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+		const match = normalized.match(/^---\n([\s\S]*?)\n---/);
 		if (!match) return null;
 		const obj: Record<string, unknown> = {};
 		for (const line of match[1].split("\n")) {

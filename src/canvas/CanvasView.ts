@@ -53,11 +53,13 @@ export class CanvasView extends ItemView {
 	private filterQuery = "";
 	private matchedCardIds: Set<string> | null = null;
 	private lastFilterQuery = "";
+	private _ownSaveCount = 0;
 
 	private readonly saveDebounced = debounce(async () => {
 		if (this.board) {
 			this.board.viewport = this.viewport.toState();
 			await this.boardRepo.save(this.board);
+			this._ownSaveCount++;
 		}
 	}, 200);
 
@@ -93,7 +95,10 @@ export class CanvasView extends ItemView {
 			() => { this.filterQuery = ""; this.lastFilterQuery = ""; this.matchedCardIds = null; this.scheduleRender(); }
 		);
 
-		this.panZoom = new PanZoom(this.canvas, this.viewport, () => this.scheduleRender());
+		this.panZoom = new PanZoom(this.canvas, this.viewport, () => {
+			this.scheduleRender();
+			this.saveDebounced();
+		});
 		this.panZoom.attach();
 
 		this.pasteDrop = new PasteDrop(
@@ -119,6 +124,10 @@ export class CanvasView extends ItemView {
 		this.registerEvent(
 			this.app.vault.on("modify", (file) => {
 				if (file.path === "LinkIndex/board.json") {
+					if (this._ownSaveCount > 0) {
+						this._ownSaveCount--;
+						return; // 自身の保存によるイベントはスキップ
+					}
 					this.boardRepo.load().then((b) => { this.board = b; this.scheduleRender(); });
 				} else if (file.path.startsWith("LinkIndex/thumbnails/")) {
 					this.imageCache.invalidate(file.path);
@@ -145,6 +154,9 @@ export class CanvasView extends ItemView {
 		await this.index.load();
 		this.board = await this.boardRepo.load();
 		this.viewport.fromState(this.board.viewport);
+
+		// インデックスにないカードノードを復旧または削除
+		await this.recoverOrphanedNodes();
 
 		this.onResize();
 		this.scheduleRender();
@@ -539,6 +551,27 @@ export class CanvasView extends ItemView {
 	}
 
 	// ────────────────────────────── Public API ──────────────────────────────
+
+	private async recoverOrphanedNodes(): Promise<void> {
+		if (!this.board) return;
+		const orphanIds = new Set<string>();
+		for (const node of this.board.nodes) {
+			if (node.type !== "card") continue;
+			const cn = node as CardNode;
+			if (!this.index.get(cn.card_id)) {
+				const card = await this.cardRepo.read(cn.card_id);
+				if (card) {
+					this.index.set(card);
+				} else {
+					orphanIds.add(cn.id);
+				}
+			}
+		}
+		if (orphanIds.size > 0) {
+			this.board.nodes = this.board.nodes.filter((n) => !orphanIds.has(n.id));
+			await this.boardRepo.save(this.board);
+		}
+	}
 
 	fitToContent(): void {
 		if (!this.board || this.board.nodes.length === 0) return;

@@ -71,11 +71,10 @@ export class LinkIndex {
 
 	private saveCache(): void {
 		const cacheDir = "LinkIndex/.cache";
-		this.app.vault.adapter.exists(cacheDir).then((exists) => {
-			if (!exists) this.app.vault.adapter.mkdir(cacheDir);
-		}).then(() => {
+		this.app.vault.adapter.exists(cacheDir).then(async (exists) => {
+			if (!exists) await this.app.vault.adapter.mkdir(cacheDir);
 			const data = JSON.stringify(Array.from(this.cards.values()), null, 2);
-			this.app.vault.adapter.write(CACHE_PATH, data);
-		});
+			await this.app.vault.adapter.write(CACHE_PATH, data);
+		}).catch(() => { /* キャッシュ書き込み失敗は無視 */ });
 	}
 }
