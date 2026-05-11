@@ -178,16 +178,16 @@ export class CanvasView extends ItemView {
 
 	// ────────────────────────────── カード追加 ──────────────────────────────
 
-	async addFromUrl(url: string, sx?: number, sy?: number): Promise<void> {
+	async addFromUrl(url: string, sx?: number, sy?: number, titleOverride?: string, tagsOverride?: string[]): Promise<void> {
 		if (!this.board) return;
 		const notice = new Notice("リンクを追加中...", 0);
 		try {
 			const ogp = await fetchOgp(url);
 			const card = await this.cardRepo.create({
 				type: "web", url,
-				title: ogp.title, description: ogp.description,
+				title: titleOverride || ogp.title, description: ogp.description,
 				favicon: ogp.favicon, domain: ogp.domain,
-				tags: [], source: "manual",
+				tags: tagsOverride ?? [], source: "manual",
 			});
 			this.board.nodes.push(this.makeCardNode(card.id, sx, sy));
 			this.index.set(card);
@@ -210,7 +210,7 @@ export class CanvasView extends ItemView {
 		}
 	}
 
-	async addFromFiles(paths: string[], sx?: number, sy?: number): Promise<void> {
+	async addFromFiles(paths: string[], sx?: number, sy?: number, titleOverride?: string, tagsOverride?: string[]): Promise<void> {
 		if (!this.board) return;
 		const vaultBase = (this.app.vault.adapter as unknown as { basePath?: string }).basePath ?? "";
 		let offsetY = 0;
@@ -218,7 +218,8 @@ export class CanvasView extends ItemView {
 			const norm = normalizePath(fp, vaultBase);
 			const card = await this.cardRepo.create({
 				type: norm.type, path: norm.path,
-				title: norm.title, tags: [],
+				title: (paths.length === 1 && titleOverride) ? titleOverride : norm.title,
+				tags: (paths.length === 1 && tagsOverride) ? tagsOverride : [],
 				mime: norm.mime, source: "manual",
 			});
 			this.board.nodes.push(this.makeCardNode(card.id, sx, sy !== undefined ? sy + offsetY : undefined));
@@ -240,9 +241,9 @@ export class CanvasView extends ItemView {
 	}
 
 	openQuickAdd(): void {
-		new QuickAddModal(this.app, (v) => {
-			if (/^https?:\/\//.test(v)) void this.addFromUrl(v);
-			else void this.addFromFiles([v]);
+		new QuickAddModal(this.app, (v, title, tags) => {
+			if (/^https?:\/\//.test(v)) void this.addFromUrl(v, undefined, undefined, title || undefined, tags.length ? tags : undefined);
+			else void this.addFromFiles([v], undefined, undefined, title || undefined, tags.length ? tags : undefined);
 		}).open();
 	}
 
