@@ -56,13 +56,10 @@ export class CanvasView extends ItemView {
 	private filterQuery = "";
 	private matchedCardIds: Set<string> | null = null;
 	private lastFilterQuery = "";
-	private _ownSaveCount = 0;
-
 	private readonly saveDebounced = debounce(async () => {
 		if (this.board) {
 			this.board.viewport = this.viewport.toState();
 			await this.boardRepo.save(this.board);
-			this._ownSaveCount++;
 		}
 	}, 200);
 
@@ -126,13 +123,7 @@ export class CanvasView extends ItemView {
 		);
 		this.registerEvent(
 			this.app.vault.on("modify", (file) => {
-				if (file.path === "LinkIndex/board.json") {
-					if (this._ownSaveCount > 0) {
-						this._ownSaveCount--;
-						return; // 自身の保存によるイベントはスキップ
-					}
-					this.boardRepo.load().then((b) => { this.board = b; this.scheduleRender(); });
-				} else if (file.path.startsWith("LinkIndex/thumbnails/")) {
+				if (file.path.startsWith("LinkIndex/thumbnails/")) {
 					this.imageCache.invalidate(file.path);
 					this.scheduleRender();
 				} else {
