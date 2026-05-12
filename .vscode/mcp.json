@@ -1,0 +1,26 @@
+{
+  "inputs": [
+    {
+      "id": "vaultPath",
+      "type": "promptString",
+      "description": "Obsidian vault の絶対パス (例: C:\\Users\\you\\Documents\\MyVault)",
+      "default": "${env:OBSIDIAN_VAULT}"
+    }
+  ],
+  "servers": {
+    "link-index": {
+      "type": "stdio",
+      "command": "cargo",
+      "args": [
+        "run",
+        "--release",
+        "--manifest-path",
+        "${workspaceFolder}/link-index-mcp/Cargo.toml",
+        "--",
+        "--vault",
+        "${input:vaultPath}"
+      ],
+      "env": {}
+    }
+  }
+}
