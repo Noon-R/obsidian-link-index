@@ -34,7 +34,7 @@ URL・タイトル・タグを入力するモーダルが開きます。各フ�
 | カード種別 | 動作 |
 |---|---|
 | Webリンク | デフォルトブラウザで開く |
-| Vault内ノート | Obsidianで開く |
+| Vault内ノート | エクスプローラーでファイルを選択表示 |
 | ローカルファイル | システムの既定アプリで開く |
 
 **削除**  
@@ -234,7 +234,7 @@ macOS / Linux の場合はパスを適宜変更し、`.exe` は不要です。
 ```sh
 claude mcp add link-index \
   "D:/path/to/link-index-mcp/target/release/link-index-mcp" \
-  --args "--vault" "D:/path/to/your/vault"
+  -- --vault "D:/path/to/your/vault"
 ```
 
 ---

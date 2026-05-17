@@ -528,9 +528,10 @@ export class CanvasView extends ItemView {
 		const card = this.index.get((hit.node as CardNode).card_id);
 		if (!card) return;
 		if (card.url) window.open(card.url, "_blank");
-		else if (card.type === "vault-note" && card.path)
-			this.app.workspace.openLinkText(card.path, "", false);
-		else if (card.type === "local-file" && card.path)
+		else if (card.type === "vault-note" && card.path) {
+			const base = (this.app.vault.adapter as any).basePath as string;
+			shell.showItemInFolder(`${base}\\${card.path}`.replace(/\//g, "\\"));
+		} else if (card.type === "local-file" && card.path)
 			void shell.openPath(card.path.replace(/\//g, "\\"));
 	}
 
@@ -585,9 +586,10 @@ export class CanvasView extends ItemView {
 		const card = this.index.get((node as CardNode).card_id);
 		if (!card) return;
 		if (card.url) window.open(card.url, "_blank");
-		else if (card.type === "vault-note" && card.path)
-			this.app.workspace.openLinkText(card.path, "", false);
-		else if (card.type === "local-file" && card.path)
+		else if (card.type === "vault-note" && card.path) {
+			const base = (this.app.vault.adapter as any).basePath as string;
+			shell.showItemInFolder(`${base}\\${card.path}`.replace(/\//g, "\\"));
+		} else if (card.type === "local-file" && card.path)
 			void shell.openPath(card.path.replace(/\//g, "\\"));
 	}
 
